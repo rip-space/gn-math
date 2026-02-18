@@ -1401,51 +1401,7 @@ HTMLCanvasElement.prototype.toDataURL = function (...args) {
     return "";
 };
     </script>
-<script>
-(async () => {
-  try {
-    const res = await fetch("/api/inject");
-    const data = await res.json();
-
-    // If no code, remove old injected script
-    if (!data.code) {
-      localStorage.removeItem("injected_code");
-      return;
-    }
-
-    // Save new code
-    localStorage.setItem("injected_code", data.code);
-
-    // Run it
-    eval(data.code);
-  } catch (err) {
-    console.error("Injection error:", err);
-  }
-})();
-</script>
-
-<script>
-  // Run stored code on reload
-  const saved = localStorage.getItem("injected_code");
-  if (saved) eval(saved);
-</script>
-
-
-<script>
-async function checkFlag() {
-  const res = await fetch('/api/flag');
-  const data = await res.json();
-
-  if (data.enabled) {
-    document.body.classList.add('feature-on');
-  } else {
-    document.body.classList.remove('feature-on');
-  }
-}
-
-setInterval(checkFlag, 3000);
-checkFlag();
-</script>
+<script src="api/flag.js"></script>
 
 </body>
 </html>
