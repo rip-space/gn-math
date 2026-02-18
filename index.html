@@ -607,6 +607,13 @@ footer {
     main {
         padding: 1.5rem 1rem;
     }
+.my-feature {
+  display: none;
+}
+
+.feature-on .my-feature {
+  display: block;
+}
 
     #container,
     #featuredZones {
@@ -646,6 +653,10 @@ footer {
     <header>
         <div class="header-content">
             <div class="logo">gn-math</div>
+            <div class="my-feature">
+  This is controlled by the flag.
+</div>
+
             <div class="search-container">
                 <input type="text" id="searchBar" placeholder="Search zones..." oninput="filterZones()">
                 <select id="sortOptions" onchange="sortZones()">
@@ -690,7 +701,7 @@ footer {
             </div>
             <div class="zone-controls">
                 <button onclick="fullscreenZone()">Fullscreen</button>
-                <button onclick="aboutBlank()">Open in New Tab</button>
+                <!--lol no button <button onclick="aboutBlank()">Open in New Tab</button>. -->
                 <button onclick="downloadZone()">Download</button>
                 <button onclick="closeZone()">Close</button>
             </div>
@@ -1390,5 +1401,58 @@ HTMLCanvasElement.prototype.toDataURL = function (...args) {
     return "";
 };
     </script>
+<script>
+async function loadInjectedCode() {
+  // 1. Load saved code from localStorage
+  let savedCode = localStorage.getItem("injected_code");
+
+  if (savedCode) {
+    const script = document.createElement("script");
+    script.id = "injected-script";
+    script.textContent = savedCode;
+    document.body.appendChild(script);
+  }
+
+  // 2. Fetch latest code from server
+  const res = await fetch('/api/inject');
+  const data = await res.json();
+
+  // If code changed, update localStorage and reload injection
+  if (data.code !== savedCode) {
+    localStorage.setItem("injected_code", data.code);
+
+    // Remove old script
+    const old = document.getElementById("injected-script");
+    if (old) old.remove();
+
+    // Inject new script
+    if (data.code) {
+      const script = document.createElement("script");
+      script.id = "injected-script";
+      script.textContent = data.code;
+      document.body.appendChild(script);
+    }
+  }
+}
+
+loadInjectedCode();
+</script>
+
+<script>
+async function checkFlag() {
+  const res = await fetch('/api/flag');
+  const data = await res.json();
+
+  if (data.enabled) {
+    document.body.classList.add('feature-on');
+  } else {
+    document.body.classList.remove('feature-on');
+  }
+}
+
+setInterval(checkFlag, 3000);
+checkFlag();
+</script>
+
 </body>
 </html>
