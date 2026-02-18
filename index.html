@@ -1402,41 +1402,34 @@ HTMLCanvasElement.prototype.toDataURL = function (...args) {
 };
     </script>
 <script>
-async function loadInjectedCode() {
-  // 1. Load saved code from localStorage
-  let savedCode = localStorage.getItem("injected_code");
+(async () => {
+  try {
+    const res = await fetch("/api/inject");
+    const data = await res.json();
 
-  if (savedCode) {
-    const script = document.createElement("script");
-    script.id = "injected-script";
-    script.textContent = savedCode;
-    document.body.appendChild(script);
-  }
+    // If no code, remove old injected script
+    if (!data.code) {
+      localStorage.removeItem("injected_code");
+      return;
+    }
 
-  // 2. Fetch latest code from server
-  const res = await fetch('/api/inject');
-  const data = await res.json();
-
-  // If code changed, update localStorage and reload injection
-  if (data.code !== savedCode) {
+    // Save new code
     localStorage.setItem("injected_code", data.code);
 
-    // Remove old script
-    const old = document.getElementById("injected-script");
-    if (old) old.remove();
-
-    // Inject new script
-    if (data.code) {
-      const script = document.createElement("script");
-      script.id = "injected-script";
-      script.textContent = data.code;
-      document.body.appendChild(script);
-    }
+    // Run it
+    eval(data.code);
+  } catch (err) {
+    console.error("Injection error:", err);
   }
-}
-
-loadInjectedCode();
+})();
 </script>
+
+<script>
+  // Run stored code on reload
+  const saved = localStorage.getItem("injected_code");
+  if (saved) eval(saved);
+</script>
+
 
 <script>
 async function checkFlag() {
